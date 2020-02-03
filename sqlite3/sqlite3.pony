@@ -185,10 +185,7 @@ class Sqlite3
 	fun result_description(rc:SqliteResultCode): String iso^ =>
 		recover String.copy_cstring(@sqlite3_errstr(rc)) end
 	
-	fun ref query(sql:String)? =>
-		"""
-		call when you want to run a query but don't care about iterating over the results
-		"""
+	fun ref query(sql:String):SqliteQueryIter? =>
 		var stmt = Pointer[SQL3Statement]
 		var sql_tail_unused = Pointer[U8]
 		
@@ -196,35 +193,19 @@ class Sqlite3
 		if (rc != SQL3.result_ok()) or stmt.is_null() then
 			closeAndError()?
 		end
-		
-		while @sqlite3_step(stmt) == SQL3.result_row() do
-			None
-		end
-		
-		@sqlite3_finalize(stmt)
-		
+				
 		SqliteQueryIter(stmt)
 	
-	fun ref queryValues(sql:String):SqliteQueryIter? =>
-		"""
-		call when you want to run a query and then iterate over the results
-		"""
-		var stmt = Pointer[SQL3Statement]
-		var sql_tail_unused = Pointer[U8]
-	
-		var rc = @sqlite3_prepare_v3(connection, sql.cpointer(), sql.size().i32()+1, 0, addressof stmt, addressof sql_tail_unused)
-		if (rc != SQL3.result_ok()) or stmt.is_null() then
-			closeAndError()?
-		end
-	
-		SqliteQueryIter(stmt)
 
 class SqliteQueryIter is Iterator[SqliteRow]
 	let stmt: Pointer[SQL3Statement]
 	var rc:SqliteResultCode = SQL3.result_ok()
 	
 	new create(stmt': Pointer[SQL3Statement]) =>
-		stmt = stmt'		
+		stmt = stmt'
+	
+	fun ref finish()? =>
+		while has_next() do next()? end
 		
 	fun ref has_next(): Bool =>
 		rc = @sqlite3_step(stmt)

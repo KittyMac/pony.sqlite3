@@ -27,7 +27,7 @@ class iso _Test1 is UnitTest
 				  )
 				"""
 			
-			db.query(createTable)?
+			db.query(createTable)?.finish()?
 			
 			let insertPeople = """
 			        insert into users
@@ -38,7 +38,7 @@ class iso _Test1 is UnitTest
 			        ("anders", 30, "anders@example.com")
 				"""
 			
-			db.query(insertPeople)?
+			db.query(insertPeople)?.finish()?
 			
 			
 			let getPeople = """
@@ -46,7 +46,7 @@ class iso _Test1 is UnitTest
 				"""
 			
 			var resultCheck = String(1024)
-			for row in db.queryValues(getPeople)? do
+			for row in db.query(getPeople)? do
 				resultCheck.append(row(1)?)
 				resultCheck.push(',')
 				resultCheck.append(row(2)?)
