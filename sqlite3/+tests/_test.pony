@@ -20,7 +20,7 @@ class iso _Test1 is UnitTest
 			
 			db.beginTransaction()?
 			
-			let createTable = """
+			let createTableString = """
 				  create table users (
 				    id    integer primary key,
 				    name  text  not null,
@@ -29,26 +29,29 @@ class iso _Test1 is UnitTest
 				  )
 				"""
 			
-			db.exec(createTable)?
+			db.exec(createTableString)?
 			
-			let insertPeople = """
+			let insertPeopleString = """
 			        insert into users
 			        (name, age, email)
 			        values
-			        ("tim", 40, "tim@example.com"),
-			        ("anika", 20, "anika@example.com"),
-			        ("anders", 30, "anders@example.com")
-				"""
+			        (?, ?, ?),
+			        (?, ?, ?),
+			        (?, ?, ?)
+				"""			
+			let insertPeopleSql = db.sql(insertPeopleString)?.>
+				bind("tim").>bind(I32(40)).>bind("tim@example.com").>
+				bind("anika").>bind(I32(20)).>bind("anika@example.com").>
+				bind("anders").>bind(I32(30)).>bind("anders@example.com")
 			
-			db.exec(insertPeople)?
+			db.query(insertPeopleSql)?.finish()?
 			
 			
-			let getPeople = """
+			let getPeopleString = """
 			        select * from users
 				"""
-			
 			var resultCheck = String(1024)
-			for row in db.query(getPeople)? do
+			for row in db.query(getPeopleString)? do
 				resultCheck.append(row.string(1)?)
 				resultCheck.push(',')
 				resultCheck.append(row.string(2)?)

@@ -8,21 +8,21 @@ use "lib:sqlite3"
 // Based on: https://github.com/joncfoo/pony-sqlite
 use @sqlite3_libversion[Pointer[U8]]()
 use @sqlite3_open_v2[SqliteResultCode](
-  file_name: Pointer[U8] tag,
-  connection: Pointer[Pointer[SQL3Connection]],
-  flags: I32,
-  vfs: Pointer[U8] tag
+	file_name: Pointer[U8] tag,
+	connection: Pointer[Pointer[SQL3Connection]],
+	flags: I32,
+	vfs: Pointer[U8] tag
 )
 use @sqlite3_close_v2[SqliteResultCode](connection: Pointer[SQL3Connection] tag)
 use @sqlite3_errstr[Pointer[U8]](rc: SqliteResultCode)
 
 use @sqlite3_prepare_v3[SqliteResultCode](
-  connection: Pointer[SQL3Connection] tag,
-  sql: Pointer[U8] tag,
-  sql_len: I32,
-  prepare_flags: SqlitePrepareFlag,
-  statement: Pointer[Pointer[SQL3Statement]],
-  sql_tail: Pointer[Pointer[U8]]
+	connection: Pointer[SQL3Connection] tag,
+	sql: Pointer[U8] tag,
+	sql_len: I32,
+	prepare_flags: SqlitePrepareFlag,
+	statement: Pointer[Pointer[SQL3Statement]],
+	sql_tail: Pointer[Pointer[U8]]
 )
 use @sqlite3_step[SqliteResultCode](statement: Pointer[SQL3Statement] tag)
 use @sqlite3_reset[SqliteResultCode](statement: Pointer[SQL3Statement] tag)
@@ -63,8 +63,8 @@ primitive SQL3Connection
 primitive SQL3Statement
 
 class SQL3ZeroBlob
-  let length: (I32 | U64)
-  new create(length': (I32 | U64)) =>
+	let length: (I32 | U64)
+	new create(length': (I32 | U64)) =>
 	length = length'
 
 type SqliteOpenFlag is I32
@@ -73,26 +73,26 @@ type SqlitePrepareFlag is U32
 type SqliteDataType is I32
 
 primitive SQL3
-	fun open_readonly():	   SqliteOpenFlag => 0x00000001		/* Ok for sqlite3_open_v2() */
-	fun open_readwrite():	   SqliteOpenFlag => 0x00000002		/* Ok for sqlite3_open_v2() */
-	fun open_create():		   SqliteOpenFlag => 0x00000004		/* Ok for sqlite3_open_v2() */
-	fun open_deleteonclose():  SqliteOpenFlag => 0x00000008		/* VFS only */
-	fun open_exclusive():	   SqliteOpenFlag => 0x00000010		/* VFS only */
-	fun open_autoproxy():	   SqliteOpenFlag => 0x00000020		/* VFS only */
-	fun open_uri():			   SqliteOpenFlag => 0x00000040		/* Ok for sqlite3_open_v2() */
-	fun open_memory():		   SqliteOpenFlag => 0x00000080		/* Ok for sqlite3_open_v2() */
-	fun open_main_db():		   SqliteOpenFlag => 0x00000100		/* VFS only */
-	fun open_temp_db():		   SqliteOpenFlag => 0x00000200		/* VFS only */
-	fun open_transient_db():   SqliteOpenFlag => 0x00000400		/* VFS only */
-	fun open_main_journal():   SqliteOpenFlag => 0x00000800		/* VFS only */
-	fun open_temp_journal():   SqliteOpenFlag => 0x00001000		/* VFS only */
-	fun open_subjournal():	   SqliteOpenFlag => 0x00002000		/* VFS only */
+	fun open_readonly():		 SqliteOpenFlag => 0x00000001		/* Ok for sqlite3_open_v2() */
+	fun open_readwrite():		 SqliteOpenFlag => 0x00000002		/* Ok for sqlite3_open_v2() */
+	fun open_create():			 SqliteOpenFlag => 0x00000004		/* Ok for sqlite3_open_v2() */
+	fun open_deleteonclose():	SqliteOpenFlag => 0x00000008		/* VFS only */
+	fun open_exclusive():		 SqliteOpenFlag => 0x00000010		/* VFS only */
+	fun open_autoproxy():		 SqliteOpenFlag => 0x00000020		/* VFS only */
+	fun open_uri():				 SqliteOpenFlag => 0x00000040		/* Ok for sqlite3_open_v2() */
+	fun open_memory():			 SqliteOpenFlag => 0x00000080		/* Ok for sqlite3_open_v2() */
+	fun open_main_db():			 SqliteOpenFlag => 0x00000100		/* VFS only */
+	fun open_temp_db():			 SqliteOpenFlag => 0x00000200		/* VFS only */
+	fun open_transient_db():	 SqliteOpenFlag => 0x00000400		/* VFS only */
+	fun open_main_journal():	 SqliteOpenFlag => 0x00000800		/* VFS only */
+	fun open_temp_journal():	 SqliteOpenFlag => 0x00001000		/* VFS only */
+	fun open_subjournal():		 SqliteOpenFlag => 0x00002000		/* VFS only */
 	fun open_master_journal(): SqliteOpenFlag => 0x00004000		/* VFS only */
-	fun open_nomutex():		   SqliteOpenFlag => 0x00008000		/* Ok for sqlite3_open_v2() */
-	fun open_fullmutex():	   SqliteOpenFlag => 0x00010000		/* Ok for sqlite3_open_v2() */
-	fun open_sharedcache():	   SqliteOpenFlag => 0x00020000		/* Ok for sqlite3_open_v2() */
-	fun open_privatecache():   SqliteOpenFlag => 0x00040000		/* Ok for sqlite3_open_v2() */
-	fun open_wal():			   SqliteOpenFlag => 0x00080000		/* VFS only */
+	fun open_nomutex():			 SqliteOpenFlag => 0x00008000		/* Ok for sqlite3_open_v2() */
+	fun open_fullmutex():		 SqliteOpenFlag => 0x00010000		/* Ok for sqlite3_open_v2() */
+	fun open_sharedcache():		 SqliteOpenFlag => 0x00020000		/* Ok for sqlite3_open_v2() */
+	fun open_privatecache():	 SqliteOpenFlag => 0x00040000		/* Ok for sqlite3_open_v2() */
+	fun open_wal():				 SqliteOpenFlag => 0x00080000		/* VFS only */
 	
 	fun prepare_persistent(): SqlitePrepareFlag => 1			/* A hint to the query planner that the prepared statement will be retained for a long time and probably reused many times. */
 	fun prepare_no_vtab(): SqlitePrepareFlag => 4				/* The SQLITE_PREPARE_NO_VTAB flag causes the SQL compiler to return an error (error rc SQLITE_ERROR) if the statement uses any virtual tables. */
@@ -140,6 +140,8 @@ interface Sqlite3Delegate
 	
 //type SQL3Type is (F64 | I32 | I64 | String | Array[U8])
 type SQL3Type is (I32 | String)
+
+// MARK: ---------------------------- CLASS SQLITE3 ----------------------------
 
 class Sqlite3
 	"""
@@ -192,19 +194,27 @@ class Sqlite3
 	fun result_description(rc:SqliteResultCode): String iso^ =>
 		recover String.copy_cstring(@sqlite3_errstr(rc)) end
 	
-	fun ref query(sql:String):SqliteQueryIter? =>
-		var stmt = Pointer[SQL3Statement]
-		var sql_tail_unused = Pointer[U8]
+	fun ref query(sqlThing:(String box | SqliteSqlStatement)):SqliteQueryIter? =>
 		
-		var rc = @sqlite3_prepare_v3(connection, sql.cpointer(), sql.size().i32()+1, 0, addressof stmt, addressof sql_tail_unused)
-		if (rc != SQL3.result_ok()) or stmt.is_null() then
-			closeAndError()?
+		match sqlThing
+		| let sqlString:String box =>
+			var stmt = Pointer[SQL3Statement]
+			var sql_tail_unused = Pointer[U8]
+			
+			var rc = @sqlite3_prepare_v3(connection, sqlString.cpointer(), sqlString.size().i32()+1, 0, addressof stmt, addressof sql_tail_unused)
+			if (rc != SQL3.result_ok()) or stmt.is_null() then
+				closeAndError()?
+			end
+			
+			SqliteQueryIter(stmt)
+		| let sqlStmt:SqliteSqlStatement =>
+			
+			SqliteQueryIter(sqlStmt.stmt)
 		end
 				
-		SqliteQueryIter(stmt)
-	
-	fun ref exec(sql:String)? =>
-		let rc = @sqlite3_exec[SqliteResultCode](connection, sql.cstring(), Pointer[U8], Pointer[U8], Pointer[U8])
+		
+	fun ref exec(sqlString:String)? =>
+		let rc = @sqlite3_exec[SqliteResultCode](connection, sqlString.cstring(), Pointer[U8], Pointer[U8], Pointer[U8])
 		if rc != SQL3.result_ok() then
 			closeAndError()?
 		end
@@ -215,6 +225,56 @@ class Sqlite3
 	fun ref endTransaction()? =>
 		exec("END TRANSACTION")?
 	
+	fun ref sql(sqlString:String):SqliteSqlStatement? =>
+		SqliteSqlStatement(connection, sqlString)?
+
+// MARK: ---------------------------- CLASS SQLITESQLSTATEMENT ----------------------------
+
+class SqliteSqlStatement
+	var stmt:Pointer[SQL3Statement]
+	var bind_index:I32 = 1
+	
+	new create(connection:Pointer[SQL3Connection], sql:String)? =>
+		stmt = Pointer[SQL3Statement]
+		
+		var sql_tail_unused = Pointer[U8]
+		var rc = @sqlite3_prepare_v3(connection, sql.cpointer(), sql.size().i32()+1, 0, addressof stmt, addressof sql_tail_unused)
+		if (rc != SQL3.result_ok()) or stmt.is_null() then
+			error
+		end
+	
+    fun @_noop() =>
+      None
+	
+	fun ref bind(value:(None | F64 | I32 | I64 | String box | Array[U8] box)) =>
+		match value
+		| None =>
+			@sqlite3_bind_null(stmt, bind_index)
+		| let v: F64 =>
+			@sqlite3_bind_double(stmt, bind_index, v)
+		| let v: I32 =>
+			@sqlite3_bind_int(stmt, bind_index, v)
+		| let v: I64 =>
+			@sqlite3_bind_int64(stmt, bind_index, v)
+		| let v: String box =>
+			let length = v.size().u64()
+			if length <= I32.max_value().u64() then
+				@sqlite3_bind_text(stmt, bind_index, v.cpointer(), v.size().i32(), addressof this._noop)
+			else
+				let utf8: U8 = 1
+				@sqlite3_bind_text64(stmt, bind_index, v.cpointer(), length, addressof this._noop, utf8)
+			end
+		| let v: Array[U8] box =>
+			let length = v.size().u64()
+			if length <= I32.max_value().u64() then
+				@sqlite3_bind_blob(stmt, bind_index, v.cpointer(), v.size().i32(), addressof this._noop)
+			else
+				@sqlite3_bind_blob64(stmt, bind_index, v.cpointer(), length, addressof this._noop)
+			end
+		end
+		bind_index = bind_index + 1
+
+// MARK: ---------------------------- CLASS SQLITEQUERYITER ----------------------------
 
 class SqliteQueryIter is Iterator[SqliteRow]
 	let stmt: Pointer[SQL3Statement]
@@ -239,7 +299,8 @@ class SqliteQueryIter is Iterator[SqliteRow]
 			error
 		end
 		SqliteRow(stmt)
-	 
+
+// MARK: ---------------------------- CLASS SQLITEROW ----------------------------
 
 class SqliteRow
 	let stmt: Pointer[SQL3Statement]
@@ -266,7 +327,6 @@ class SqliteRow
 	
 	fun bytes(i:I32):Array[U8]? =>
 		if i >= numCols then error end
-	    let arr = @sqlite3_column_blob(stmt, i)
-	    let length = @sqlite3_column_bytes(stmt, i)
-	    Array[U8].from_cpointer(arr, length.usize()).clone()
-	
+		let arr = @sqlite3_column_blob(stmt, i)
+		let length = @sqlite3_column_bytes(stmt, i)
+		Array[U8].from_cpointer(arr, length.usize()).clone()
