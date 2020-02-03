@@ -27,6 +27,13 @@ use @sqlite3_prepare_v3[SqliteResultCode](
 use @sqlite3_step[SqliteResultCode](statement: Pointer[SQL3Statement] tag)
 use @sqlite3_reset[SqliteResultCode](statement: Pointer[SQL3Statement] tag)
 use @sqlite3_finalize[SqliteResultCode](statement: Pointer[SQL3Statement] tag)
+use @sqlite3_exec[SqliteResultCode](
+	connection: Pointer[SQL3Connection] tag, 
+	sql: Pointer[U8] tag,
+	callback: Pointer[U8],
+	arg: Pointer[U8],
+	errorMsg: Pointer[U8]
+)
 
 use @sqlite3_bind_parameter_count[I32](statement: Pointer[SQL3Statement] tag)
 use @sqlite3_bind_parameter_index[I32](statement: Pointer[SQL3Statement] tag, name: Pointer[U8] tag)
@@ -195,6 +202,18 @@ class Sqlite3
 		end
 				
 		SqliteQueryIter(stmt)
+	
+	fun ref exec(sql:String)? =>
+		let rc = @sqlite3_exec[SqliteResultCode](connection, sql.cstring(), Pointer[U8], Pointer[U8], Pointer[U8])
+		if rc != SQL3.result_ok() then
+			closeAndError()?
+		end
+	
+	fun ref beginTransaction()? =>
+		exec("BEGIN TRANSACTION")?
+	
+	fun ref endTransaction()? =>
+		exec("END TRANSACTION")?
 	
 
 class SqliteQueryIter is Iterator[SqliteRow]

@@ -18,6 +18,8 @@ class iso _Test1 is UnitTest
 		try
 			let db = Sqlite3.memory()?
 			
+			db.beginTransaction()?
+			
 			let createTable = """
 				  create table users (
 				    id    integer primary key,
@@ -27,7 +29,7 @@ class iso _Test1 is UnitTest
 				  )
 				"""
 			
-			db.query(createTable)?.finish()?
+			db.exec(createTable)?
 			
 			let insertPeople = """
 			        insert into users
@@ -38,7 +40,7 @@ class iso _Test1 is UnitTest
 			        ("anders", 30, "anders@example.com")
 				"""
 			
-			db.query(insertPeople)?.finish()?
+			db.exec(insertPeople)?
 			
 			
 			let getPeople = """
@@ -54,6 +56,8 @@ class iso _Test1 is UnitTest
 				resultCheck.append(row(3)?)
 				resultCheck.push(',')
 			end
+			
+			db.endTransaction()?
 						
 			h.complete( resultCheck == "tim,40,tim@example.com,anika,20,anika@example.com,anders,30,anders@example.com," )
 		else
