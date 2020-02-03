@@ -248,10 +248,25 @@ class SqliteRow
 		stmt = stmt'
 		numCols = @sqlite3_column_count[I32](stmt)
 	
-	// TODO: I'd like to rewrite this using generics
-	fun apply(i:I32):String? =>
-		if i >= numCols then
-			error
-		end
+	fun string(i:I32):String iso^? =>
+		if i >= numCols then error end
 		String.from_cstring(@sqlite3_column_text(stmt, i)).clone()
+	
+	fun i32(i:I32):I32? =>
+		if i >= numCols then error end
+		@sqlite3_column_int(stmt, i)
+	
+	fun i64(i:I32):I64? =>
+		if i >= numCols then error end
+		@sqlite3_column_int64(stmt, i)
+	
+	fun f64(i:I32):F64? =>
+		if i >= numCols then error end
+		@sqlite3_column_double(stmt, i)
+	
+	fun bytes(i:I32):Array[U8]? =>
+		if i >= numCols then error end
+	    let arr = @sqlite3_column_blob(stmt, i)
+	    let length = @sqlite3_column_bytes(stmt, i)
+	    Array[U8].from_cpointer(arr, length.usize()).clone()
 	

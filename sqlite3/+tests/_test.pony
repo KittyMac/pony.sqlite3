@@ -49,11 +49,11 @@ class iso _Test1 is UnitTest
 			
 			var resultCheck = String(1024)
 			for row in db.query(getPeople)? do
-				resultCheck.append(row(1)?)
+				resultCheck.append(row.string(1)?)
 				resultCheck.push(',')
-				resultCheck.append(row(2)?)
+				resultCheck.append(row.string(2)?)
 				resultCheck.push(',')
-				resultCheck.append(row(3)?)
+				resultCheck.append(row.string(3)?)
 				resultCheck.push(',')
 			end
 			
