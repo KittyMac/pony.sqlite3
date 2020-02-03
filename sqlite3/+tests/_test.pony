@@ -54,7 +54,7 @@ class iso _Test1 is UnitTest
 			for row in db.query(getPeopleString)? do
 				resultCheck.append(row.string(1)?)
 				resultCheck.push(',')
-				resultCheck.append(row.string(2)?)
+				resultCheck.append(row.i32(2)?.string())
 				resultCheck.push(',')
 				resultCheck.append(row.string(3)?)
 				resultCheck.push(',')
