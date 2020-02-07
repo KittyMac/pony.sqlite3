@@ -168,7 +168,12 @@ class Sqlite3
 	
 	new file(pathToFile:String)? =>
 		isEmpty = false
-		let rc = @sqlite3_open_v2( pathToFile.cstring(), addressof connection, open_flags, Pointer[U8].create() )
+		var rc = SQL3.result_ok()
+		if (StringExt.startswith(pathToFile, ":memory:")) then
+			rc = @sqlite3_open_v2( ":memory:".cstring(), addressof connection, open_flags, Pointer[U8].create() )
+		else
+			rc = @sqlite3_open_v2( pathToFile.cstring(), addressof connection, open_flags, Pointer[U8].create() )
+		end
 		if (rc != SQL3.result_ok()) then closeAndError()? end
 	
 	fun ref close():SqliteResultCode =>
@@ -218,6 +223,11 @@ class Sqlite3
 		if rc != SQL3.result_ok() then
 			closeAndError()?
 		end
+	
+	fun ref branch(sqlString:(String box | SqliteSqlStatement)):Bool? =>
+		// run the query, if num rows > 0 then return true
+		query(sqlString)?.has_next()
+		
 	
 	fun ref beginTransaction()? =>
 		exec("BEGIN TRANSACTION")?
