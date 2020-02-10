@@ -1,7 +1,5 @@
-use "ponytest"
-use "fileExt"
 use "stringExt"
-use "json"
+use "collections"
 
 use "lib:sqlite3"
 
@@ -164,7 +162,10 @@ class Sqlite3
 	new memory()? =>
 		isEmpty = false
 		let rc = @sqlite3_open_v2( ":memory:".cstring(), addressof connection, open_flags, Pointer[U8].create() )
-		if (rc != SQL3.result_ok()) then closeAndError()? end
+		if (rc != SQL3.result_ok()) then 
+			close()
+			error
+		end
 	
 	new file(pathToFile:String)? =>
 		isEmpty = false
@@ -174,7 +175,10 @@ class Sqlite3
 		else
 			rc = @sqlite3_open_v2( pathToFile.cstring(), addressof connection, open_flags, Pointer[U8].create() )
 		end
-		if (rc != SQL3.result_ok()) then closeAndError()? end
+		if (rc != SQL3.result_ok()) then
+			close()
+			error
+		end
 	
 	fun ref close():SqliteResultCode =>
 		if connection.is_null() == false then
@@ -183,11 +187,7 @@ class Sqlite3
 			return result
 		end
 		SQL3.result_ok()
-	
-	fun ref closeAndError()? =>
-		close()
-		error
-	
+		
 	fun _final() =>
 		if connection.is_null() == false then
 			@sqlite3_close_v2(connection)
@@ -208,7 +208,8 @@ class Sqlite3
 			
 			var rc = @sqlite3_prepare_v3(connection, sqlString.cpointer(), sqlString.size().i32()+1, 0, addressof stmt, addressof sql_tail_unused)
 			if (rc != SQL3.result_ok()) or stmt.is_null() then
-				closeAndError()?
+				close()
+				error
 			end
 			
 			SqliteQueryIter(stmt)
@@ -221,13 +222,27 @@ class Sqlite3
 	fun ref exec(sqlString:String)? =>
 		let rc = @sqlite3_exec[SqliteResultCode](connection, sqlString.cstring(), Pointer[U8], Pointer[U8], Pointer[U8])
 		if rc != SQL3.result_ok() then
-			closeAndError()?
+			close()
+			error
 		end
 	
 	fun ref branch(sqlString:(String box | SqliteSqlStatement)):Bool? =>
 		// run the query, if num rows > 0 then return true
 		query(sqlString)?.has_next()
-		
+	
+	fun ref printAll(sqlString:(String box | SqliteSqlStatement))? =>
+		// run the query, if num rows > 0 then return true
+		@fprintf[I32](@pony_os_stdout[Pointer[U8]](), "=========================\n".cstring())
+		@fprintf[I32](@pony_os_stdout[Pointer[U8]](), "> %s\n".cstring(), sqlString.string().cstring())
+		for row in query(sqlString)? do
+			try
+				for i in Range[I32](0, 10) do
+					@fprintf[I32](@pony_os_stdout[Pointer[U8]](), "%s, ".cstring(), row.string(i)?.cstring())
+				end
+			end
+			@fprintf[I32](@pony_os_stdout[Pointer[U8]](), "\n".cstring())
+		end
+		@fprintf[I32](@pony_os_stdout[Pointer[U8]](), "=========================\n".cstring())
 	
 	fun ref beginTransaction()? =>
 		exec("BEGIN TRANSACTION")?
@@ -241,11 +256,16 @@ class Sqlite3
 // MARK: ---------------------------- CLASS SQLITESQLSTATEMENT ----------------------------
 
 class SqliteSqlStatement
+	let sql:String
 	var stmt:Pointer[SQL3Statement]
 	var bind_index:I32 = 1
 	
-	new create(connection:Pointer[SQL3Connection], sql:String)? =>
+	fun string():String =>
+		sql
+	
+	new create(connection:Pointer[SQL3Connection], sql':String)? =>
 		stmt = Pointer[SQL3Statement]
+		sql = sql'
 		
 		var sql_tail_unused = Pointer[U8]
 		var rc = @sqlite3_prepare_v3(connection, sql.cpointer(), sql.size().i32()+1, 0, addressof stmt, addressof sql_tail_unused)
