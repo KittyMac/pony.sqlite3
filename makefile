@@ -1,11 +1,10 @@
 all:
-	corral run -- /Volumes/Development/Development/pony/ponyc/build/release/ponyc -o ./build/ ./sqlite3
+	corral run -- ponyc -o ./build/ ./sqlite3
 	./build/sqlite3
 
 test:
-	corral run -- /Volumes/Development/Development/pony/ponyc/build/release/ponyc -V=0 -o ./build/ ./sqlite3
+	corral run -- ponyc -V=0 -o ./build/ ./sqlite3
 	./build/sqlite3
-
 
 
 
