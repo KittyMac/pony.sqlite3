@@ -1,7 +1,5 @@
 use "ponytest"
-use "fileExt"
 use "stringExt"
-use "json"
 
 actor Main is TestList
 	new create(env: Env) => PonyTest(env, this)
