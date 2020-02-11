@@ -1,7 +1,7 @@
 {
   "locks": [
     {
-      "locator": "/Volumes/Development/Development/pony/pony.stringExt"
+      "locator": "github.com/KittyMac/pony.stringExt.git"
     }
   ]
 }
