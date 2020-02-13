@@ -237,6 +237,7 @@ class Sqlite3
     // run the query, if num rows > 0 then return true
     let s = sqlString.string()
     if s.contains("INSERT") or s.contains("UPDATE") or s.contains("DELETE") then
+      query(sqlString)?.finish()?
       return @sqlite3_changes[I32](connection) > 0
     else
       return query(sqlString)?.has_next()
