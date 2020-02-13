@@ -13,6 +13,9 @@ use @sqlite3_open_v2[SqliteResultCode](
 )
 use @sqlite3_close_v2[SqliteResultCode](connection: Pointer[SQL3Connection] tag)
 use @sqlite3_errstr[Pointer[U8]](rc: SqliteResultCode)
+use @sqlite3_errmsg[Pointer[U8] val](connection: Pointer[SQL3Connection] tag)
+
+use @sqlite3_changes[I32](connection: Pointer[SQL3Connection] tag)
 
 use @sqlite3_prepare_v3[SqliteResultCode](
 	connection: Pointer[SQL3Connection] tag,
@@ -56,6 +59,7 @@ use @sqlite3_column_int[I32](statement: Pointer[SQL3Statement] tag, column: I32)
 use @sqlite3_column_int64[I64](statement: Pointer[SQL3Statement] tag, column: I32)
 use @sqlite3_column_text[Pointer[U8]](statement: Pointer[SQL3Statement] tag, column: I32)
 use @sqlite3_column_bytes[I32](statement: Pointer[SQL3Statement] tag, column: I32)
+
 
 primitive SQL3Connection
 primitive SQL3Statement
@@ -195,9 +199,12 @@ class Sqlite3
 	
 	fun version(): String iso^ =>
 		recover String.copy_cstring(@sqlite3_libversion()) end
-	
-	fun result_description(rc:SqliteResultCode): String iso^ =>
+  
+  fun result_description(rc:SqliteResultCode): String iso^ =>
 		recover String.copy_cstring(@sqlite3_errstr(rc)) end
+	
+	fun ref error_message(): String ref =>
+		String.copy_cstring(@sqlite3_errmsg(connection))
 	
 	fun ref query(sqlThing:(String box | SqliteSqlStatement)):SqliteQueryIter? =>
 		
