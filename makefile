@@ -1,5 +1,5 @@
 all:
-	corral run -- ponyc -o ./build/ ./sqlite3
+	corral run -- ponyc --print-code -o ./build/ ./sqlite3
 	./build/sqlite3
 
 test:
