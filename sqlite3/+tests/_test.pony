@@ -14,7 +14,7 @@ class iso _Test1 is UnitTest
 
   fun apply(h: TestHelper) =>
     try
-      let db = PonySqlite3.memory()?
+      let db = Sqlite3.memory()?
       
       db.beginTransaction()?
       
@@ -69,5 +69,5 @@ class iso _Test2 is UnitTest
   fun name(): String => "test 2 - empty"
 
   fun apply(h: TestHelper) =>
-    PonySqlite3.empty()
+    Sqlite3.empty()
     h.complete(true)

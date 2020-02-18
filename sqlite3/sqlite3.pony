@@ -5,10 +5,10 @@ use "lib:sqlite3"
 
 // MARK: ---------------------------- CLASS SQLITE3 ----------------------------
 
-type SQL3Connection is Sqlite3
+type SQL3Connection is _Sqlite3
 type SqliteResultCode is U32
 
-class PonySqlite3
+class Sqlite3
   """
   Provide a generic interface for interacting with Sqlite3 databases.
   Note that sqlite3 is read concurrent but not write concurrent, so optimal uses would mean that
@@ -16,7 +16,7 @@ class PonySqlite3
   """
   
   let isEmpty:Bool
-  let open_flags:U32 = (Sqlite.open_readwrite() or Sqlite.open_create())
+  let open_flags:U32 = (_Sqlite.open_readwrite() or _Sqlite.open_create())
   
   var connection:Pointer[SQL3Connection] tag = Pointer[SQL3Connection]
   
@@ -29,20 +29,20 @@ class PonySqlite3
   new memory()? =>
     isEmpty = false
     let rc = @sqlite3_open_v2( ":memory:".cstring(), addressof connection, open_flags, Pointer[U8].create() )
-    if (rc != Sqlite.ok()) then 
+    if (rc != _Sqlite.ok()) then 
       close()
       error
     end
   
   new file(pathToFile:String)? =>
     isEmpty = false
-    var rc = Sqlite.ok()
+    var rc = _Sqlite.ok()
     if (StringExt.startswith(pathToFile, ":memory:")) then
       rc = @sqlite3_open_v2( ":memory:".cstring(), addressof connection, open_flags, Pointer[U8].create() )
     else
       rc = @sqlite3_open_v2( pathToFile.cstring(), addressof connection, open_flags, Pointer[U8].create() )
     end
-    if (rc != Sqlite.ok()) then
+    if (rc != _Sqlite.ok()) then
       close()
       error
     end
@@ -53,7 +53,7 @@ class PonySqlite3
       connection = Pointer[SQL3Connection]
       return result
     end
-    Sqlite.ok()
+    _Sqlite.ok()
     
   fun _final() =>
     if connection.is_null() == false then
@@ -73,11 +73,11 @@ class PonySqlite3
     
     match sqlThing
     | let sqlString:String box =>
-      var stmt:Pointer[Sqlite3Stmt] tag = Pointer[Sqlite3Stmt]
+      var stmt:Pointer[_Sqlite3Stmt] tag = Pointer[_Sqlite3Stmt]
       var sql_tail_unused:Pointer[U8] tag = Pointer[U8]
       
       var rc = @sqlite3_prepare_v2(connection, sqlString.cpointer(), sqlString.size().u32()+1, addressof stmt, addressof sql_tail_unused)
-      if (rc != Sqlite.ok()) or stmt.is_null() then
+      if (rc != _Sqlite.ok()) or stmt.is_null() then
         close()
         error
       end
@@ -93,7 +93,7 @@ class PonySqlite3
     // sqlite3_exec[U32](arg2:Pointer[Sqlite3] tag, sql:Pointer[U8] tag, callback:Pointer[None] tag, arg3:Pointer[None] tag, errmsg:Pointer[Pointer[U8] tag] tag)
     var errmsg:Pointer[U8] tag = Pointer[U8]
     let rc = @sqlite3_exec[SqliteResultCode](connection, sqlString.cstring(), Pointer[U8], Pointer[U8], addressof errmsg)
-    if rc != Sqlite.ok() then
+    if rc != _Sqlite.ok() then
       close()
       error
     end
@@ -135,19 +135,19 @@ class PonySqlite3
 
 class SqliteSqlStatement
   let sql:String
-  var stmt:Pointer[Sqlite3Stmt] tag
+  var stmt:Pointer[_Sqlite3Stmt] tag
   var bind_index:U32 = 1
   
   fun string():String =>
     sql
   
   new create(connection:Pointer[SQL3Connection] tag, sql':String)? =>
-    stmt = Pointer[Sqlite3Stmt]
+    stmt = Pointer[_Sqlite3Stmt]
     sql = sql'
     
     var sql_tail_unused:Pointer[U8] tag = Pointer[U8]
     var rc = @sqlite3_prepare_v2(connection, sql.cpointer(), sql.size().u32()+1, addressof stmt, addressof sql_tail_unused)
-    if (rc != Sqlite.ok()) or stmt.is_null() then
+    if (rc != _Sqlite.ok()) or stmt.is_null() then
       error
     end
   
@@ -185,10 +185,10 @@ class SqliteSqlStatement
 // MARK: ---------------------------- CLASS SQLITEQUERYITER ----------------------------
 
 class SqliteQueryIter is Iterator[SqliteRow]
-  let stmt: Pointer[Sqlite3Stmt] tag
-  var rc:SqliteResultCode = Sqlite.ok()
+  let stmt: Pointer[_Sqlite3Stmt] tag
+  var rc:SqliteResultCode = _Sqlite.ok()
   
-  new create(stmt': Pointer[Sqlite3Stmt] tag) =>
+  new create(stmt': Pointer[_Sqlite3Stmt] tag) =>
     stmt = stmt'
   
   fun ref finish()? =>
@@ -196,14 +196,14 @@ class SqliteQueryIter is Iterator[SqliteRow]
     
   fun ref has_next(): Bool =>
     rc = @sqlite3_step(stmt)
-    if rc != Sqlite.row() then
+    if rc != _Sqlite.row() then
       @sqlite3_finalize(stmt)
       return false
     end
     true
 
   fun ref next(): SqliteRow? =>
-    if rc != Sqlite.row() then
+    if rc != _Sqlite.row() then
       error
     end
     SqliteRow(stmt)
@@ -211,9 +211,9 @@ class SqliteQueryIter is Iterator[SqliteRow]
 // MARK: ---------------------------- CLASS SQLITEROW ----------------------------
 
 class SqliteRow
-  let stmt: Pointer[Sqlite3Stmt] tag
+  let stmt: Pointer[_Sqlite3Stmt] tag
   let numCols:U32
-  new create(stmt': Pointer[Sqlite3Stmt] tag) =>
+  new create(stmt': Pointer[_Sqlite3Stmt] tag) =>
     stmt = stmt'
     numCols = @sqlite3_column_count(stmt)
   
